@@ -2,16 +2,26 @@
 title: "Manuscript"
 author: "Erwin Kers"
 date: "31 5 2022"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
+Necessary to run in order due to dependencies on libraries in early chunks of code
 
-Plotting the CTD data using 
-## CTD data
 ```{r CTD data, echo=FALSE, fig.align=, fig.height=6, fig.keep='all', fig.width=10, message=FALSE, warning=FALSE, paged.print=FALSE, results='hide'}
+#Libraries
+
+Sys.setlocale("LC_ALL", "English")
+```
+
+## CTD data
+
+```{r CTD data, echo=FALSE, fig.align=, fig.height=6, fig.keep='all', fig.width=10, message=FALSE, warning=FALSE, paged.print=FALSE, results='hide'}
+# general: plotting the CTD data
 
 #Tidying the data frames
-setwd("C:/Users/Erwin/OneDrive/Manuscript Erwin Kers/R script + data/Data")
+setwd("C:/Users/Erwin/OneDrive/Manuscript Erwin Kers/R script + data/Manuscript-1.0/Data")
 
 # Load libraries for CTD plots
 library(oce)
@@ -23,11 +33,11 @@ library(plyr)
 library(tidyverse)
 library(dplyr)
 library(cowplot)
+
 # Formatted the data files selected:
   # downcast
   # correct series
   # removed everything above -0.1 m depth
-  #
 
 # Tidying datafile #1 27-oct-2020 ----
 
@@ -357,19 +367,18 @@ p4 <- ctd_mba %>%
   scale_x_date (breaks="month", labels = scales::label_date("%b"))
 
 ## combine plots ----
-plot_grid(p1, p2,p4,condbar, labels = c('A', 'B', "C","D"))
+plot_grid(p1, p2,p4, labels = c('A', 'B', "C"))
 
 ```
 
-
-
 ## Environmental observations (attached to the CTD plots)
+
 ```{r echo=FALSE,results='hide',fig.keep='all', fig.height = 4, fig.width = 8, fig.align = "center"}
 #conditions
 library(readxl)
 library(dplyr)
 library(ggthemes)
-cond <- read_excel("C:/Users/Erwin/OneDrive/Manuscript Erwin Kers/R script + data/Data/Environmental observations/Environmental observations.xlsx")
+cond <- read_excel("C:/Users/Erwin/OneDrive/Manuscript Erwin Kers/R script + data/Manuscript-1.0/Data/Environmental observations.xlsx")
 #cond #just showing off the table
 
 # barplot
@@ -393,12 +402,50 @@ scale_fill_manual(values=c("light blue", "grey"))
 #possible to theme
  # theme_tufte()
   
+condbar
 ```
 
+## Rotifer composition
+
+```{r echo=FALSE,results='hide',fig.keep='all', fig.height = 4, fig.width = 8, fig.align = "center"}
+
+rotifer <- read_excel("C:/Users/Erwin/OneDrive/Manuscript Erwin Kers/R script + data/Manuscript-1.0/Data/rotifer.xlsx")
+
+str(rotifer) # checking if variables are in the right format
+
+# to calculate rotifers per net haul
+ifelse(( rotifer[8:16]) > 0, (d <-(((rotifer$`sample(ml)`/rotifer$`subsample(ml)`)*rotifer[8:16])/rotifer$fraction)),0)
+rotifer2 <- bind_cols(rotifer[1:7],d)
+
+
+# plotting
+plotrot <-filter(rotifer2, 
+                 site == "Takvatn") %>%
+  pivot_longer(., cols = "Keratella cochlearis"  :"Conochilus unicornis", names_to = "species", values_to = "values")%>%
+    mutate(species = fct_reorder(species, values, .fun='median')) %>%
+  ggplot(., aes(fill=species, y=values, x= date)) + 
+  geom_bar(position="dodge", stat="identity")+
+  labs(title="Rotifer composition", y = " N per net haul")
+
+plotrot
+
+# stacked barplot
+plotrot2 <-filter(rotifer2, 
+                 site == "Takvatn") %>%
+  pivot_longer(., cols = "Keratella cochlearis"  :"Conochilus unicornis", names_to = "species", values_to = "values")%>%
+    mutate(species = fct_reorder(species, values, .fun='median')) %>%
+  ggplot(., aes(fill=species, y=values, x= date)) + 
+  geom_bar(position="stack", stat="identity")+
+  labs(title="Rotifer composition", y = " N per net haul")
+
+plotrot2
+
+```
 
 ## light sensor data (might not include in paper?)
+
 ```{r echo=FALSE,results='hide',fig.keep='all', fig.height = 4, fig.width = 8, fig.align = "center"}
-water <- read.csv2("C:/Users/Erwin/OneDrive/UIT/Thesis/Light sensor data/Light sensor data - LakeIce, Takvatn/Water light sensor Winter/WATER sensor.csv")
+water <- read.csv2("C:/Users/Erwin/OneDrive/Manuscript Erwin Kers/R script + data/Manuscript-1.0/Data/WATER sensor.csv")
 
 library(lubridate)
 
@@ -413,34 +460,32 @@ str(water$Date)
 sub.water <-subset(water,Zone=="WATER")
 sub.air <-subset(water,Zone=="AIR")
 
-
-lims <- as.POSIXct(strptime(c("2020-11-20 08:09:00", "2021-07-15 17:31:00"), 
-                   format = "%Y-%m-%d %H:%M"))
-
 #GGplot
 light <- ggplot(sub.water,aes(Datefix,divided.10000))+
   geom_line()+
   geom_point(data = sub.air)+
-  labs(title="Light sensor", y = "Quantum [umol/(m^2s)]",x = "Month") +
-xlim(c(as.POSIXct('2020-11-20 08:09', format = "%Y-%m-%d %H:%M"),
-     as.POSIXct('2021-07-15 17:31', format = "%Y-%m-%d %H:%M")))
+  labs(title="Under ice light availability", y = "Quantum [umol/(m^2s)]",x = "Month") +
+xlim(c(as.POSIXct('2021-02-05 08:09', format = "%Y-%m-%d %H:%M"),
+     as.POSIXct('2021-06-08 17:31', format = "%Y-%m-%d %H:%M")))
 
  light
  
- # scale_x_datetime(breaks="month",limits = as_datetime(c('2020-11-20 08:09:00','2021-07-15 17:31:00')),labels = scales::label_date("%b"))
-  
+ # to visualize the whole experiment (missing data)
+ # xlim(c(as.POSIXct('2020-11-20 08:09', format = "%Y-%m-%d %H:%M"),
+ #    as.POSIXct('2021-07-15 17:31', format = "%Y-%m-%d %H:%M")))
+ 
+ #scale_x_datetime(breaks="month",limits = as_datetime(c('2020-11-20 08:09:00','2021-07-15 17:31:00')),labels = scales::label_date("%b"))
  
 ```
 
-
-
 ## nutrient data
+
 ```{r echo=FALSE,results='hide', fig.height = 4, fig.width = 8, fig.align = "center"}
 library(readxl)
 library(dplyr)
 library(tidyverse)
 library(ggbreak)
-nutrient <- read_excel("C:/Users/Erwin/OneDrive/UIT/Data/Nutrient data/nutrient data.xlsx")
+nutrient <- read_excel("C:/Users/Erwin/OneDrive/Manuscript Erwin Kers/R script + data/Manuscript-1.0/Data/nutrient data.xlsx")
 
 
 #Nutrients
@@ -463,6 +508,7 @@ barnut4
 ```
 
 ## Chlorophyll A data
+
 ```{r echo=FALSE,results='hide',fig.keep='all', fig.height = 4, fig.width = 8, fig.align = "center"}
 
 # CHl-a Data
@@ -470,11 +516,10 @@ barnut4
 library(readxl)
 library(tidyverse)
 library(cowplot)
-Chla <- read_excel("C:/Users/Erwin/OneDrive/UIT/Data/Chl-a/Chl-a for R.xlsx")
+Chla <- read_excel("C:/Users/Erwin/OneDrive/Manuscript Erwin Kers/R script + data/Manuscript-1.0/Data/Chl-a for R.xlsx")
 
 Chla$Date <- as.Date(Chla$Date,
                      origin = "1899-12-30")
-Sys.setlocale(category = "LC_ALL", locale = "english")
 
 #barplot of chl2
 chlbar <-filter(Chla, 
@@ -490,11 +535,11 @@ chlbar
 ```
 
 ## Phytoplankton community
+
 ```{r echo=FALSE,results='hide',fig.keep='all', fig.height = 4, fig.width = 8, fig.align = "center"}
 #phytoplankton community
-# 6-01-2021
 
-phy <- read_excel("C:/Users/Erwin/OneDrive/UIT/Data/Phytoplankton community/Phytoplankton community.xlsx")
+phy <- read_excel("C:/Users/Erwin/OneDrive/Manuscript Erwin Kers/R script + data/Manuscript-1.0/Data/Phytoplankton community.xlsx")
 library(ggplot2)
 library(tidyverse)
 library(forcats)
@@ -502,11 +547,8 @@ library(ggthemes)
 library(ggbreak)
 phy$Date <- as.Date(phy$Date,
                      origin = "1899-12-30")
-Sys.setlocale(category = "LC_ALL", locale = "english")
-
 phy <-phy %>%
   mutate(.[c(5:12)]*100)
-
 
 # with Cryptophytes
 phybar2 <- phy %>% 
@@ -526,18 +568,18 @@ phybar2
 ```
 
 ## Zooplankton Biomass
+
 ```{r echo=FALSE,results='hide',fig.keep='all', fig.height = 4, fig.width = 8, fig.align = "center"}
 library(forcats)
 library(ggplot2)
 
 ### Biomass zooplankton
-Biom <-read.csv2("C:/Users/Erwin/OneDrive/UIT/Thesis/Samples/Zooplankton biomas/Zooplankton Biomass.csv")
+Biom <-read.csv2("C:/Users/Erwin/OneDrive/Manuscript Erwin Kers/R script + data/Manuscript-1.0/Data/Zooplankton Biomass.csv")
 
 
 ### to get right date format
 Biom$Datefix <- as.Date(Biom$Date,
                         origin = "1899-12-30")
-Sys.setlocale(category = "LC_ALL", locale = "english")
 
 # Stacked barplot
 Biom <- subset(Biom,Depth !="60-20")
@@ -563,8 +605,9 @@ biombar
 ```
 
 ## zooplankton community
+
 ```{r echo=FALSE,results='hide',fig.keep='all', fig.height = 4, fig.width = 8, fig.align = "center"}
-Zoopcomp <- read.csv2("C:/Users/Erwin/OneDrive/UIT/Thesis/Samples/Zooplankton ID complete.csv")
+Zoopcomp <- read.csv2("C:/Users/Erwin/OneDrive/Manuscript Erwin Kers/R script + data/Manuscript-1.0/Data/Zooplankton ID complete.csv")
 
 library(ggplot2)
 library(ggthemes)
@@ -598,7 +641,7 @@ E <- q %>%
   geom_bar(position="stack", stat="identity") +
   scale_x_date(breaks="month", labels = scales::label_date("%b"),limits = as.Date(c('2020-10-20','2021-06-15')))+
     facet_wrap(~Depth2)+ 
-  labs(title="Eudiaptomus", y = "N per vertical meter", x= "")+
+  labs(title="E. graciloides", y = "N per vertical meter", x= "")+
  scale_fill_discrete(name = "Legend", labels = c( "Female + eggs", "Female","Male","C4-C5")) +
 theme(axis.text.x = element_text(angle = 90))
 E
@@ -612,7 +655,7 @@ C <- q %>%
   geom_bar(position="stack", stat="identity") +
   scale_x_date(breaks="month", labels = scales::label_date("%b"),limits = as.Date(c('2020-10-20','2021-06-15')))+
     facet_wrap(~Depth2)+ 
-  labs(title="Cyclops", y = "N per vertical meter", x= "")+
+  labs(title="C. scutifer", y = "N per vertical meter", x= "")+
  scale_fill_discrete(name = "Legend", labels = c( "Adults", "C1-C3","C4-C5"))+
 theme(axis.text.x = element_text(angle = 90))
 C
@@ -649,12 +692,13 @@ N
 ```
 
 ### combined zooplankton community
+
 ```{r echo=FALSE,results='hide',fig.keep='all', fig.height = 8, fig.width = 6, fig.align = "center"}
 plot_grid(E,C,N,ncol=1,align = "v")
 ```
 
-
 ## Total lipids over time and total FA overtime
+
 ```{r echo=FALSE,results='hide',fig.keep='all', fig.height = 4, fig.width = 8, fig.align = "center"}
 
 library(readxl)
@@ -662,7 +706,7 @@ library(ggplot2)
 library(tidyverse)
 library(lubridate)
 library(scales)
-FA <- read_excel("C:/Users/Erwin/OneDrive/UIT/Data/FA data/FA data.xlsx", skip=1)
+FA <- read_excel("C:/Users/Erwin/OneDrive/Manuscript Erwin Kers/R script + data/Manuscript-1.0/Data/FA data.xlsx", skip=1)
 #changing data format
 FA$Date <- as.Date(FA$Date)
 
@@ -685,13 +729,15 @@ totlip <- ggplot(Filt, aes(x= Date, y= Tot_lipids, fill= Species,color=Species))
 totlip  
 
 ```
+
 There is a large difference between the previous and next plot, in the Total lipids plot it seems Cyclops has an higher lipid content. Whn looking at the FA classes if you'd add them up Eudiaptomus has higher content of FAME. This makes me wonder is it normal to have such a difference between to two species in glycerol content? Is this purely due to the difference in storage and membrane lipds?
 
 (or is there something beside the removal of glycerol that can cause this difference?)
 
 ## FA groups over time
+
 ```{r echo=FALSE,results='hide',fig.keep='all',fig.height = 4, fig.width = 8, fig.align = "center"}
-FA <- read_excel("C:/Users/Erwin/OneDrive/UIT/Data/FA data/FA data.xlsx", skip=1)
+FA <- read_excel("C:/Users/Erwin/OneDrive/Manuscript Erwin Kers/R script + data/Manuscript-1.0/Data/FA data.xlsx", skip=1)
 #changing data format
 FA$Date <- as.Date(FA$Date)
 
@@ -733,10 +779,12 @@ FABAR2
 ```
 
 ## FA per L of POM
-I have a meeting next week with Matthias @ Wassercluster lunz to discuss if this is correct.
+
+I have a meeting next week with Matthias \@ Wassercluster lunz to discuss if this is correct.
+
 ```{r echo=FALSE,results='hide',fig.keep='all',fig.height = 4, fig.width = 8, fig.align = "center"}
 library(readxl)
-FA <- read_excel("C:/Users/Erwin/OneDrive/UIT/Data/FA data/FA data.xlsx", skip=1)
+FA <- read_excel("C:/Users/Erwin/OneDrive/Manuscript Erwin Kers/R script + data/Manuscript-1.0/Data/FA data.xlsx", skip=1)
 #changing data format
 FA$Date <- as.Date(FA$Date)
 
@@ -847,10 +895,10 @@ FA %>%
 
 ```
 
-
 ## FAME % per grouped FA
+
 ```{r echo=FALSE,results='hide',fig.keep='all',fig.height = 6, fig.width = 8, fig.align = "center"}
-FA <- read_excel("C:/Users/Erwin/OneDrive/UIT/Data/FA data/FA data.xlsx", skip=1)
+FA <- read_excel("C:/Users/Erwin/OneDrive/Manuscript Erwin Kers/R script + data/Manuscript-1.0/Data/FA data.xlsx", skip=1)
 #changing data format
 FA$Date <- as.Date(FA$Date)
 
@@ -920,6 +968,7 @@ FA %>%
 ```
 
 # added plot 2
+
 ```{r echo=FALSE,results='hide',fig.keep='all', fig.height = 8, fig.width = 8, fig.align = "center"}
 library(ggbreak)
 plot_grid(FALIN,FALIN2,ncol=1,align = "v")
@@ -929,13 +978,14 @@ plot_grid(FALIN,FALIN2,ncol=1,align = "v")
 # CA plots
 
 ## CA ALL (to appendix)
+
 ```{r echo=FALSE,results='hide',fig.keep='all', fig.height = 8, fig.width = 8, fig.align = "center"}
 
 
 library(tidyverse)
 library(readxl)
 library(easyCODA)
-FA.dat <- read_excel("C:/Users/Erwin/OneDrive/UIT/Data/FA data/FA data.xlsx", skip=1)
+FA.dat <- read_excel("C:/Users/Erwin/OneDrive/Manuscript Erwin Kers/R script + data/Manuscript-1.0/Data/FA data.xlsx", skip=1)
 
 # Selection of data 
 # selecting only % for the 3 species
@@ -1075,13 +1125,14 @@ anova(FA.cca1, by = "margin") #or by terms, margin, axis
 ```
 
 ## CA Only Eudiaptoms
+
 ```{r echo=FALSE,results='hide',fig.keep='all', fig.height = 8, fig.width = 8, fig.align = "center"}
 
 
 library(tidyverse)
 library(readxl)
 library(easyCODA)
-FA.dat <- read_excel("C:/Users/Erwin/OneDrive/UIT/Data/FA data/FA data.xlsx", skip=1)
+FA.dat <- read_excel("C:/Users/Erwin/OneDrive/Manuscript Erwin Kers/R script + data/Manuscript-1.0/Data/FA data.xlsx", skip=1)
 
 # Selection of data 
 # selecting only % for the 3 species
@@ -1217,13 +1268,14 @@ legend("topright", legend=c("1 = 24/11/2020","2 = 15/01/2021","3 = 05/02/2021",
 ```
 
 ## CA ONLY CYCLOPS
+
 ```{r echo=FALSE,fig.keep='all', fig.height = 8, fig.width = 8, fig.align = "center"}
 
 
 library(tidyverse)
 library(readxl)
 library(easyCODA)
-FA.dat <- read_excel("C:/Users/Erwin/OneDrive/UIT/Data/FA data/FA data.xlsx", skip=1)
+FA.dat <- read_excel("C:/Users/Erwin/OneDrive/Manuscript Erwin Kers/R script + data/Manuscript-1.0/Data/FA data.xlsx", skip=1)
 
 # Selection of data 
 # selecting only % for the 3 species
@@ -1362,13 +1414,14 @@ anova(FA.cca1, by = "margin") #or by terms, margin, axis
 ```
 
 ## CA ONLY POM
+
 ```{r echo=FALSE,results='hide',fig.keep='all', fig.height = 8, fig.width = 8, fig.align = "center"}
 
 
 library(tidyverse)
 library(readxl)
 library(easyCODA)
-FA.dat <- read_excel("C:/Users/Erwin/OneDrive/UIT/Data/FA data/FA data.xlsx", skip=1)
+FA.dat <- read_excel("C:/Users/Erwin/OneDrive/Manuscript Erwin Kers/R script + data/Manuscript-1.0/Data/FA data.xlsx", skip=1)
 
 # Selection of data 
 # selecting only % for the 3 species
@@ -1507,13 +1560,14 @@ anova(FA.cca1, by = "margin") #or by terms, margin, axis
 ```
 
 ## CA ONLY EuDIAPTOMUS AND CYCLOPS (to appendix)
+
 ```{r echo=FALSE,results='hide',fig.keep='all', fig.height = 8, fig.width = 8, fig.align = "center"}
 
 
 library(tidyverse)
 library(readxl)
 library(easyCODA)
-FA.dat <- read_excel("C:/Users/Erwin/OneDrive/UIT/Data/FA data/FA data.xlsx", skip=1)
+FA.dat <- read_excel("C:/Users/Erwin/OneDrive/Manuscript Erwin Kers/R script + data/Manuscript-1.0/Data/FA data.xlsx", skip=1)
 
 # Selection of data 
 # selecting only % for the 3 species
@@ -1650,11 +1704,12 @@ anova(FA.cca1, by = "margin") #or by terms, margin, axis
 
 ```
 
-
 # Extra plots
+
 ### Most likely in appendix
 
 ## Light data
+
 ```{r echo=FALSE,results='hide',fig.keep='all', fig.height = 4, fig.width = 8, fig.align = "center"}
 #light data from handheld sensor (one with the cables)
 
@@ -1678,9 +1733,10 @@ ggplot(., aes(x= Date, y=values, fill= Type)) +
 lhand
 ```
 
-
 ## barplot fatty acids
+
 Shows fatty acid composition per sample. only for the major contributing fatty acids
+
 ```{r echo=FALSE,results='hide',fig.keep='all', fig.height = 4, fig.width = 8, fig.align = "center"}
 library(dplyr)
 library(readxl)
@@ -1689,7 +1745,7 @@ library(RColorBrewer)
 library(tidyverse)
 library(cowplot)
 
-FA_data <- read_excel("C:/Users/Erwin/OneDrive/UIT/Data/FA data/FA data.xlsx", skip=1)
+FA_data <- read_excel("C:/Users/Erwin/OneDrive/Manuscript Erwin Kers/R script + data/Manuscript-1.0/Data/FA data.xlsx", skip=1)
 
 #Subset 1 species
 bar <- subset(FA_data, Type=="%" & Species=="Cyclops")
@@ -1745,17 +1801,21 @@ Bar3
 ```
 
 Plot grid (removed)
+
 ```{r echo=FALSE,results='hide',fig.keep='all', fig.height = 7, fig.width = 6, fig.align = "center"}
 plot_grid(FALIN,FALIN2,ncol=1,align = "v")
 ```
 
 Plot grid Zooplankton (remov)
+
 ```{r echo=FALSE,results='hide',fig.keep='all', fig.height = 8, fig.width = 6, fig.align = "center"}
 plot_grid(E,C,N,ncol=1,align = "v")
 ```
 
 ## Fatty acid table
+
 Symbols aren't right in R markdown but are fine in a normal plot, but the general idea is visible.
+
 ```{r echo=FALSE,results='hide',fig.keep='all', fig.height = 4, fig.width = 8, fig.align = "center"}
 #pretty fa table
 library(tidyverse)
@@ -1765,7 +1825,7 @@ library(dplyr)
 library(lubridate)
 
 
-FA <- read_excel("C:/Users/Erwin/OneDrive/UIT/Data/FA data/FA data.xlsx", skip=1)
+FA <- read_excel("C:/Users/Erwin/OneDrive/Manuscript Erwin Kers/R script + data/Manuscript-1.0/Data/FA data.xlsx", skip=1)
 #str(FA$Date)
 
 FA2 <- FA %>%
@@ -1913,8 +1973,6 @@ unite("C20:0",starts_with("C20:0"),sep= "±",na.rm = TRUE, remove = T)%>%
   select(-Type_mean,-Type_sd,-Tot_lipids_sd,-Tot_lipids_stdev_sd)
 ```
 
-
-
 ## Chi square distance POM to zooplankton
 
 ```{r echo=T, fig.height = 8, fig.width = 8, fig.align = "center"}
@@ -1924,7 +1982,7 @@ library(tidyverse)
 library(readxl)
 library(easyCODA)
 library(ggdendro)
-FA.dat <- read_excel("C:/Users/Erwin/OneDrive/UIT/Data/FA data/FA data.xlsx", skip=1)
+FA.dat <- read_excel("C:/Users/Erwin/OneDrive/Manuscript Erwin Kers/R script + data/Manuscript-1.0/Data/FA data.xlsx", skip=1)
 
 # Selection of data 
 # selecting only % for the 3 species
@@ -2050,9 +2108,10 @@ row.names(chi2d) <- c("2020-11-24", "2021-01-15", "2021-02-05","2021-03-18", "20
 write_xlsx(chi2d,"C:/Users/Erwin/OneDrive/UIT/Data/chi distance/chi2.xlsx")
 
 ```
+
 ## Combined plot for thesis (previous ones are for a more detailed look)
 
-I can't figure out how I can add the break from the nutrient plot (due to high silica levels) to the combined plot. Somehow it disappears, if you know how to do this please let me know :) 
+I can't figure out how I can add the break from the nutrient plot (due to high silica levels) to the combined plot. Somehow it disappears, if you know how to do this please let me know :)
 
 ```{r echo=FALSE,results='hide',fig.keep='all', fig.height = 8, fig.width = 8, fig.align = "center"}
 library(ggbreak)
@@ -2065,4 +2124,3 @@ library(ggbreak)
 plot_grid(condbar,lhand,barnut2,chlbar,ncol=1,align = "v")
 
 ```
-
