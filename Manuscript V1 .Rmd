@@ -9,15 +9,13 @@ output:
 
 Necessary to run in order due to dependencies on libraries in early chunks of code
 
-```{r CTD data, echo=FALSE, fig.align=, fig.height=6, fig.keep='all', fig.width=10, message=FALSE, warning=FALSE, paged.print=FALSE, results='hide'}
-#Libraries
-
+```{r echo=FALSE, fig.align=, fig.height=6, fig.keep='all', fig.width=10, message=FALSE, warning=FALSE, paged.print=FALSE, results='hide'}
 Sys.setlocale("LC_ALL", "English")
 ```
 
 ## CTD data
 
-```{r CTD data, echo=FALSE, fig.align=, fig.height=6, fig.keep='all', fig.width=10, message=FALSE, warning=FALSE, paged.print=FALSE, results='hide'}
+```{r echo=FALSE, fig.align=, fig.height=6, fig.keep='all', fig.width=10, message=FALSE, warning=FALSE, paged.print=FALSE, results='hide'}
 # general: plotting the CTD data
 
 #Tidying the data frames
