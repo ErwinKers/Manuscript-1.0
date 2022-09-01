@@ -8,21 +8,17 @@ output:
   html_document: default
 ---
 
-Necessary to run in order due to dependencies on libraries in early chunks of code
+Important! set working directory to where you saved the data/ R script
 
 ```{r}
+
+#working directory
+setwd("C:/Users/Erwin/OneDrive/Manuscript Erwin Kers/R script + data/Manuscript-1.0")
+
+#change time to english for correct labels
 Sys.setlocale("LC_TIME", "English")
-```
 
-## CTD plots
-
-```{r echo=FALSE, fig.align=, fig.height=6, fig.keep='all', fig.width=10, message=FALSE, warning=FALSE, paged.print=FALSE, results='hide'}
-# general: plotting the CTD data
-
-#Tidying the data frames
-setwd("C:/Users/Erwin/OneDrive/Manuscript Erwin Kers/R script + data/Manuscript-1.0/Data")
-
-# Load libraries for CTD plots
+#libraries for all following plots
 library(oce)
 library(lubridate)
 library(reshape2)
@@ -33,6 +29,16 @@ library(tidyverse)
 library(dplyr)
 library(cowplot)
 library(readxl)
+library(ggthemes)
+
+```
+
+## CTD plots
+
+```{r echo=FALSE, fig.align=, fig.height=6, fig.keep='all', fig.width=10, message=FALSE, warning=FALSE, paged.print=FALSE, results='hide'}
+# general: plotting the CTD data
+
+#Tidying the data frames
 
 # Formatted the data files selected:
   # downcast
@@ -42,7 +48,7 @@ library(readxl)
 # Tidying datafile #1 27-oct-2020 ----
 
 #as a pipe (O2_sat, O2_mgL)
-CTD_oct <- read_csv2("CTD Takvatn/CTD 1335 291020.csv", skip =4) %>%
+CTD_oct <- read_csv2("Data/CTD Takvatn/CTD 1335 291020.csv", skip =4) %>%
   # remove the downcast
   filter( Ser == 2)%>%
   slice(c(1:131))%>% # selecting the downcast
@@ -63,7 +69,7 @@ CTD_oct <- read_csv2("CTD Takvatn/CTD 1335 291020.csv", skip =4) %>%
 
 # Tidying datafile #2 24-nov-2020 ----
 
-CTD_nov <- read_csv2("CTD Takvatn/CTD 1335 261120.csv", skip =4) %>%
+CTD_nov <- read_csv2("Data/CTD Takvatn/CTD 1335 261120.csv", skip =4) %>%
   filter( Ser == 1)%>%
   slice(c(1:168))%>% # selecting the downcast
   select(Press, Temp,  'OpOx %',"Opmg/l",Date,Time,"F (?g/l)")%>%
@@ -83,7 +89,7 @@ CTD_nov <- read_csv2("CTD Takvatn/CTD 1335 261120.csv", skip =4) %>%
 
 # Tidying datafile #3 15-jan-2021 ----
 
-CTD_jan <- read_csv2("CTD Takvatn/CTD 1335 200121.csv", skip =4) %>%
+CTD_jan <- read_csv2("Data/CTD Takvatn/CTD 1335 200121.csv", skip =4) %>%
   filter( Ser == 1)%>%
   slice(c(1:226))%>% # selecting the downcast
   select(Press, Temp, 'OpOx %',"Opmg/l",Date,Time,"F (?g/l)")%>%
@@ -103,7 +109,7 @@ CTD_jan <- read_csv2("CTD Takvatn/CTD 1335 200121.csv", skip =4) %>%
 
 # Tidying datafile #4 05-feb-2021 ----
 
-CTD_feb <- read_csv2("CTD Takvatn/CTD 1350 080221.csv", skip =4) %>%
+CTD_feb <- read_csv2("Data/CTD Takvatn/CTD 1350 080221.csv", skip =4) %>%
   filter( Ser == 2)%>%
   slice(c(1:654))%>% # selecting the downcast
   select(Press, Temp, 'OpOx %',"Opmg/l",Date,Time,"F (?g/l)")%>%
@@ -123,7 +129,7 @@ CTD_feb <- read_csv2("CTD Takvatn/CTD 1350 080221.csv", skip =4) %>%
 
 # Tidying datafile #5 18-mar-2021 ----
 
-CTD_mar <- read.csv2("CTD Takvatn/CTD 1350 180321.csv", skip =3) %>%
+CTD_mar <- read.csv2("Data/CTD Takvatn/CTD 1350 180321.csv", skip =3) %>%
   filter( Ser == 1)%>%
   slice(c(1:148))%>% # selecting the downcast
   select(Press, Temp, 'OpOx..',"Opmg.l",Date,Time,"F..μg.l.")%>%
@@ -144,7 +150,7 @@ CTD_mar <- read.csv2("CTD Takvatn/CTD 1350 180321.csv", skip =3) %>%
 # Tidying datafile #6 19-apr-2021 ----
 
 #as a pipe (O2_sat, O2_mgL)
-CTD_apr <- read.csv2("CTD Takvatn/Winterlakes 19.04.21.csv", skip =31) %>%
+CTD_apr <- read.csv2("Data/CTD Takvatn/Winterlakes 19.04.21.csv", skip =31) %>%
   slice(-c(1))%>%
   slice(c(1:1061))%>% # selecting the downcast
   select(Press, Temp, 'Ri.O2',DO_mg,IntT,IntD,ChlAS)%>%
@@ -165,7 +171,7 @@ CTD_apr <- read.csv2("CTD Takvatn/Winterlakes 19.04.21.csv", skip =31) %>%
 
 # Tidying datafile #7 04-may-2021 ----
 
-CTD_may1 <- read.csv2("CTD Takvatn/CTD 1363 060521.csv", skip =4) %>%
+CTD_may1 <- read.csv2("Data/CTD Takvatn/CTD 1363 060521.csv", skip =4) %>%
   filter( Ser == 1)%>%
   slice(c(1:237))%>% # selecting the downcast
   select(Press, Temp, 'Ox..',"mg.l",Date,Time,"F...g.l.")%>%
@@ -187,7 +193,7 @@ CTD_may1 <- read.csv2("CTD Takvatn/CTD 1363 060521.csv", skip =4) %>%
 
 # Tidying datafile #8 19-may-2021 ----
 
-CTD_may2 <- read.csv2("CTD Takvatn/Copy of CTD 1350 200521.csv", skip =4) %>%
+CTD_may2 <- read.csv2("Data/CTD Takvatn/Copy of CTD 1350 200521.csv", skip =4) %>%
   filter( Ser == 1)%>%
   slice(c(1:219))%>% # selecting the downcast
   select(Press, Temp, 'OpOx..',"Opmg.l",Date,Time,"F...g.l.")%>%
@@ -208,7 +214,7 @@ CTD_may2 <- read.csv2("CTD Takvatn/Copy of CTD 1350 200521.csv", skip =4) %>%
 
 # Tidying datafile #9 08-jun-2021 ----
 
-CTD_jun <- read.csv2("CTD Takvatn/Copy of CTD 1350 080621.csv", skip =4) %>%
+CTD_jun <- read.csv2("Data/CTD Takvatn/Copy of CTD 1350 080621.csv", skip =4) %>%
   filter( Ser == 1)%>%
   slice(c(1:154))%>% # selecting the downcast
   select(Press, Temp, 'OpOx..',"Opmg.l",Date,Time,"F...g.l.")%>%
@@ -233,7 +239,7 @@ ctd <- rbind(CTD_nov,CTD_oct,CTD_jan,CTD_feb,CTD_mar,CTD_apr,CTD_may1,CTD_may2,C
   mutate(date = as.POSIXct(date,format="%d-%m-%Y"))
   
 # Saving the new clean/combined data
-write.csv(ctd,"C:/Users/Erwin/OneDrive/Manuscript Erwin Kers/R script + data/Data", row.names = FALSE)
+#write.csv(ctd,"C:/Users/Erwin/OneDrive/Manuscript Erwin Kers/R script + data/Data", row.names = FALSE)
 
 # Manually extracted hexidecimal ODV colour palette
 ODV_colours <- c("#feb483", "#d31f2a", "#ffc000", "#27ab19", "#0db5e6", "#7139fe", "#d16cfa")
@@ -246,7 +252,6 @@ ctd <- ctd %>%
 
 # 1. Heat map temperature ----
 
-Sys.setlocale("LC_TIME", "English") 
 ctd_mba <- ctd %>%
   filter(depth < -0.1)%>%
   mutate(date = as.POSIXct(date,format="%d-%m-%Y")) %>%
@@ -375,10 +380,8 @@ plot_grid(p1, p2,p4, labels = c('A', 'B', "C"))
 
 ```{r echo=FALSE,results='hide',fig.keep='all', fig.height = 4, fig.width = 8, fig.align = "center"}
 #conditions
-library(readxl)
-library(dplyr)
-library(ggthemes)
-cond <- read_excel("C:/Users/Erwin/OneDrive/Manuscript Erwin Kers/R script + data/Manuscript-1.0/Data/Environmental observations.xlsx")
+
+cond <- read_excel("Data/Environmental observations.xlsx")
 #cond #just showing off the table
 
 # barplot
@@ -410,7 +413,7 @@ condbar
 ## light sensor data (might not include in paper?)
 
 ```{r echo=FALSE,results='hide',fig.keep='all', fig.height = 4, fig.width = 8, fig.align = "center"}
-water <- read.csv2("C:/Users/Erwin/OneDrive/Manuscript Erwin Kers/R script + data/Manuscript-1.0/Data/WATER sensor.csv")
+water <- read.csv2("Data/WATER sensor.csv")
 
 library(lubridate)
 
@@ -450,7 +453,7 @@ library(readxl)
 library(dplyr)
 library(tidyverse)
 library(ggbreak)
-nutrient <- read_excel("C:/Users/Erwin/OneDrive/Manuscript Erwin Kers/R script + data/Manuscript-1.0/Data/nutrient data.xlsx")
+nutrient <- read_excel("Data/nutrient data.xlsx")
 
 
 #Nutrients
@@ -481,7 +484,7 @@ barnut4
 library(readxl)
 library(tidyverse)
 library(cowplot)
-Chla <- read_excel("C:/Users/Erwin/OneDrive/Manuscript Erwin Kers/R script + data/Manuscript-1.0/Data/Chl-a for R.xlsx")
+Chla <- read_excel("Data/Chl-a for R.xlsx")
 
 Chla$Date <- as.Date(Chla$Date,
                      origin = "1899-12-30")
@@ -504,7 +507,7 @@ chlbar
 ```{r echo=FALSE,results='hide',fig.keep='all', fig.height = 4, fig.width = 8, fig.align = "center"}
 #phytoplankton community
 
-phy <- read_excel("C:/Users/Erwin/OneDrive/Manuscript Erwin Kers/R script + data/Manuscript-1.0/Data/Phytoplankton community.xlsx")
+phy <- read_excel("Data/Phytoplankton community.xlsx")
 library(ggplot2)
 library(tidyverse)
 library(forcats)
@@ -535,7 +538,7 @@ phybar2
 
 ```{r echo=FALSE,results='hide',fig.keep='all', fig.height = 4, fig.width = 8, fig.align = "center"}
 
-rotifer <- read_excel("C:/Users/Erwin/OneDrive/Manuscript Erwin Kers/R script + data/Manuscript-1.0/Data/Rotifer data/rotifer.xlsx")
+rotifer <- read_excel("Data/Rotifer data/rotifer.xlsx")
 
 str(rotifer) # checking if variables are in the right format
 
@@ -589,7 +592,7 @@ library(forcats)
 library(ggplot2)
 
 ### Biomass zooplankton
-Biom <-read.csv2("C:/Users/Erwin/OneDrive/Manuscript Erwin Kers/R script + data/Manuscript-1.0/Data/Zooplankton Biomass.csv")
+Biom <-read.csv2("Data/Zooplankton Biomass.csv")
 
 
 ### to get right date format
@@ -622,7 +625,7 @@ biombar
 ## Zooplankton community
 
 ```{r echo=FALSE,results='hide',fig.keep='all', fig.height = 4, fig.width = 8, fig.align = "center"}
-Zoopcomp <- read.csv2("C:/Users/Erwin/OneDrive/Manuscript Erwin Kers/R script + data/Manuscript-1.0/Data/Zooplankton ID complete.csv")
+Zoopcomp <- read.csv2("Data/Zooplankton ID complete.csv")
 
 library(ggplot2)
 library(ggthemes)
@@ -720,7 +723,7 @@ library(ggplot2)
 library(tidyverse)
 library(lubridate)
 library(scales)
-FA <- read_excel("C:/Users/Erwin/OneDrive/Manuscript Erwin Kers/R script + data/Manuscript-1.0/Data/FA data.xlsx", skip=1)
+FA <- read_excel("Data/FA data.xlsx", skip=1)
 #changing data format
 FA$Date <- as.Date(FA$Date)
 
@@ -751,7 +754,7 @@ There is a large difference between the previous and next plot, in the Total lip
 ## FA groups over time
 
 ```{r echo=FALSE,results='hide',fig.keep='all',fig.height = 4, fig.width = 8, fig.align = "center"}
-FA <- read_excel("C:/Users/Erwin/OneDrive/Manuscript Erwin Kers/R script + data/Manuscript-1.0/Data/FA data.xlsx", skip=1)
+FA <- read_excel("Data/FA data.xlsx", skip=1)
 #changing data format
 FA$Date <- as.Date(FA$Date)
 
@@ -796,7 +799,7 @@ FABAR2
 
 ```{r echo=FALSE,results='hide',fig.keep='all',fig.height = 4, fig.width = 8, fig.align = "center"}
 library(readxl)
-FA <- read_excel("C:/Users/Erwin/OneDrive/Manuscript Erwin Kers/R script + data/Manuscript-1.0/Data/FA data.xlsx", skip=1)
+FA <- read_excel("Data/FA data.xlsx", skip=1)
 #changing data format
 FA$Date <- as.Date(FA$Date)
 
@@ -896,7 +899,7 @@ FA %>%
 ## FAME % per grouped FA
 
 ```{r echo=FALSE,results='hide',fig.keep='all',fig.height = 6, fig.width = 8, fig.align = "center"}
-FA <- read_excel("C:/Users/Erwin/OneDrive/Manuscript Erwin Kers/R script + data/Manuscript-1.0/Data/FA data.xlsx", skip=1)
+FA <- read_excel("Data/FA data.xlsx", skip=1)
 #changing data format
 FA$Date <- as.Date(FA$Date)
 
@@ -983,7 +986,7 @@ plot_grid(FALIN,FALIN2,ncol=1,align = "v")
 library(tidyverse)
 library(readxl)
 library(easyCODA)
-FA.dat <- read_excel("C:/Users/Erwin/OneDrive/Manuscript Erwin Kers/R script + data/Manuscript-1.0/Data/FA data.xlsx", skip=1)
+FA.dat <- read_excel("Data/FA data.xlsx", skip=1)
 
 # Selection of data 
 # selecting only % for the 3 species
@@ -1130,7 +1133,7 @@ anova(FA.cca1, by = "margin") #or by terms, margin, axis
 library(tidyverse)
 library(readxl)
 library(easyCODA)
-FA.dat <- read_excel("C:/Users/Erwin/OneDrive/Manuscript Erwin Kers/R script + data/Manuscript-1.0/Data/FA data.xlsx", skip=1)
+FA.dat <- read_excel("Data/FA data.xlsx", skip=1)
 
 # Selection of data 
 # selecting only % for the 3 species
@@ -1273,7 +1276,7 @@ legend("topright", legend=c("1 = 24/11/2020","2 = 15/01/2021","3 = 05/02/2021",
 library(tidyverse)
 library(readxl)
 library(easyCODA)
-FA.dat <- read_excel("C:/Users/Erwin/OneDrive/Manuscript Erwin Kers/R script + data/Manuscript-1.0/Data/FA data.xlsx", skip=1)
+FA.dat <- read_excel("Data/FA data.xlsx", skip=1)
 
 # Selection of data 
 # selecting only % for the 3 species
@@ -1419,7 +1422,7 @@ anova(FA.cca1, by = "margin") #or by terms, margin, axis
 library(tidyverse)
 library(readxl)
 library(easyCODA)
-FA.dat <- read_excel("C:/Users/Erwin/OneDrive/Manuscript Erwin Kers/R script + data/Manuscript-1.0/Data/FA data.xlsx", skip=1)
+FA.dat <- read_excel("Data/FA data.xlsx", skip=1)
 
 # Selection of data 
 # selecting only % for the 3 species
@@ -1565,7 +1568,7 @@ anova(FA.cca1, by = "margin") #or by terms, margin, axis
 library(tidyverse)
 library(readxl)
 library(easyCODA)
-FA.dat <- read_excel("C:/Users/Erwin/OneDrive/Manuscript Erwin Kers/R script + data/Manuscript-1.0/Data/FA data.xlsx", skip=1)
+FA.dat <- read_excel("Data/FA data.xlsx", skip=1)
 
 # Selection of data 
 # selecting only % for the 3 species
@@ -1701,6 +1704,10 @@ plot(FA.cca1,scaling=3)
 anova(FA.cca1, by = "margin") #or by terms, margin, axis
 
 ```
+
+
+# NOT WORKING
+# not adjusted yet (might remove this for manuscript data)
 
 # Extra plots
 
