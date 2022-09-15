@@ -285,7 +285,10 @@ p1 <- ctd_mba %>%
              colour = 'black', size = 0.5, alpha = 0.4, shape = 8) +
   labs(y = "depth (m)", x = NULL, fill = "Temp. (°C)") +
   coord_cartesian(expand = 0)+
-    scale_x_date (breaks="month", labels = scales::label_date("%b"))
+    scale_x_date (breaks="month", labels = scales::label_date("%b"))+
+    # adding the ice cover bar
+  annotate (geom = "rect" ,xmin = as.Date('2020-12-01 08:09', format = "%Y-%m-%d %H:%M"), xmax = as.Date('2021-6-01 08:09', format = "%Y-%m-%d %H:%M"), ymin = -0.1, ymax = -3, fill = "blue", alpha = 0.3) + 
+  annotate("text", x=as.Date('2021-3-01 08:09', format = "%Y-%m-%d %H:%M"), y=-1 , label= "Ice cover")
 
 # 2. heat map fluorescence ----
 ctd_mba <- ctd %>%
@@ -324,7 +327,10 @@ p2 <- ctd_mba %>%
   ###
   labs(y = "depth (m)", x = "date", fill = "Fluor (µg/l)") +
   coord_cartesian(expand = 0)+
-  scale_x_date (breaks="month", labels = scales::label_date("%b"))
+  scale_x_date (breaks="month", labels = scales::label_date("%b"))+
+  # adding the ice cover bar
+  annotate (geom = "rect" ,xmin = as.Date('2020-12-01 08:09', format = "%Y-%m-%d %H:%M"), xmax = as.Date('2021-6-01 08:09', format = "%Y-%m-%d %H:%M"), ymin = -0.1, ymax = -3, fill = "blue", alpha = 0.3) + 
+  annotate("text", x=as.Date('2021-3-01 08:09', format = "%Y-%m-%d %H:%M"), y=-1 , label= "Ice cover")
 
 # 3. oxygen sat map ----
 
@@ -369,10 +375,13 @@ p4 <- ctd_mba %>%
   ###
   labs(y = "depth (m)", x = "date", fill = "oxygen %") +
   coord_cartesian(expand = 0) +
-  scale_x_date (breaks="month", labels = scales::label_date("%b"))
+  scale_x_date (breaks="month", labels = scales::label_date("%b")) +
+  # adding the ice cover bar
+  annotate (geom = "rect" ,xmin = as.Date('2020-12-01 08:09', format = "%Y-%m-%d %H:%M"), xmax = as.Date('2021-6-01 08:09', format = "%Y-%m-%d %H:%M"), ymin = -0.1, ymax = -3, fill = "blue", alpha = 0.3) + 
+  annotate("text", x=as.Date('2021-3-01 08:09', format = "%Y-%m-%d %H:%M"), y=-1 , label= "Ice cover")
 
-## combine plots ----
-plot_grid(p1, p2,p4, labels = c('A', 'B', "C"))
+## combine plots ---- (Adds light plot, modified to fit in with other plots)
+plot_grid(p1, p2,p4,light, labels = c('A', 'B', "C", "D"))
 
 ```
 
@@ -432,7 +441,7 @@ sub.air <-subset(water,Zone=="AIR")
 light <- ggplot(sub.water,aes(Datefix,divided.10000))+
   geom_line()+
   geom_point(data = sub.air)+
-  labs(title="Under ice light availability", y = "Quantum [umol/(m^2s)]",x = "Month") +
+  labs( y = "Quantum [umol/(m^2s)]",x = "date") +
 xlim(c(as.POSIXct('2021-02-05 08:09', format = "%Y-%m-%d %H:%M"),
      as.POSIXct('2021-06-08 17:31', format = "%Y-%m-%d %H:%M")))
 
@@ -534,7 +543,7 @@ phybar2
 
 
 ```
-## Rotifer composition
+  ## Rotifer composition
 
 ```{r echo=FALSE,results='hide',fig.keep='all', fig.height = 4, fig.width = 8, fig.align = "center"}
 
@@ -578,7 +587,7 @@ rotiferplot <- rotifer2 %>%
   ggplot(., aes(x = date, y = values, fill = species )) +
   geom_bar(position = "Dodge",stat="identity") +
   scale_x_date(breaks="month", labels = scales::label_date("%b"),limits = as.Date(c('2020-10-20','2021-06-15'))) +
-  labs(title="Rotifer composition", y = "N per liter")+
+  labs(title="Rotifer composition", y = "N per net haul")+
 facet_wrap(~species, scales="free")
 
 rotiferplot
