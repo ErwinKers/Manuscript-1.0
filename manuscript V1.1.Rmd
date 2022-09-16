@@ -527,23 +527,36 @@ phy$Date <- as.Date(phy$Date,
 phy <-phy %>%
   mutate(.[c(5:12)]*100)
 
+
 # with Cryptophytes
 phybar2 <- phy %>% 
   filter( Location == "Takvatn") %>%
-  pivot_longer(cols = Cryptophytes:Diatomea, names_to = "class", values_to = "values") %>%
+  pivot_longer(cols = Cryptophytes:Diatomea, names_to = "Class", values_to = "values") %>%
   mutate(Date = as.Date(Date))%>%
-  mutate(class = fct_reorder(class, values, .fun='median')) %>%
-  ggplot(., aes(x = Date, y = values, fill = Depth )) +
-  geom_bar(position = "Dodge",stat="identity") +
+  mutate(class = fct_reorder(Class, values, .fun='median')) %>%
+  ggplot(., aes(x = Date, y = values, fill = Class )) +
+  geom_bar(position = "Stack",stat="identity") +
   scale_x_date(breaks="month", labels = scales::label_date("%b"),limits = as.Date(c('2020-10-20','2021-06-15'))) +
-  labs(title="Phytoplankton composition", y = "N per liter")+
-facet_wrap(~class, scales="free")
+  labs(title="Phytoplankton composition", y = "N per liter")
 
 phybar2
 
+# with Cryptophytes
+phybar1 <- phy %>% 
+  filter( Location == "Takvatn") %>%
+  pivot_longer(cols = Cryptophytes:Diatomea, names_to = "Class", values_to = "values") %>%
+  mutate(Date = as.Date(Date))%>%
+  mutate(class = fct_reorder(Class, values, .fun='median')) %>%
+  ggplot(., aes(x = Date, y = values, fill = Depth )) +
+  geom_bar(position = "Dodge",stat="identity") +
+  scale_x_date(breaks="month", labels = scales::label_date("%b"),limits = as.Date(c('2020-10-20','2021-06-15'))) +
+  labs(title="Phytoplankton composition", y = "N per liter") +
+facet_wrap(~Class, scales="free")
+
+phybar1 
 
 ```
-  ## Rotifer composition
+## Rotifer composition
 
 ```{r echo=FALSE,results='hide',fig.keep='all', fig.height = 4, fig.width = 8, fig.align = "center"}
 
@@ -559,8 +572,8 @@ rotifer2 <- bind_cols(rotifer[1:7],d)
 # plotting
 plotrot <-filter(rotifer2, 
                  site == "Takvatn") %>%
-  pivot_longer(., cols = "Keratella cochlearis"  :"Conochilus unicornis", names_to = "species", values_to = "values")%>%
-    mutate(species = fct_reorder(species, values, .fun='median')) %>%
+  pivot_longer(., cols = "Keratella cochlearis"  :"Conochilus unicornis", names_to = "Species", values_to = "values")%>%
+    mutate(species = fct_reorder(Species, values, .fun='median')) %>%
   ggplot(., aes(fill=species, y=values, x= date)) + 
   geom_bar(position="dodge", stat="identity")+
   labs(title="Rotifer composition", y = " N per net haul")
@@ -570,10 +583,12 @@ plotrot
 # stacked barplot
 plotrot2 <-filter(rotifer2, 
                  site == "Takvatn") %>%
-  pivot_longer(., cols = "Keratella cochlearis"  :"Conochilus unicornis", names_to = "species", values_to = "values")%>%
-    mutate(species = fct_reorder(species, values, .fun='median')) %>%
-  ggplot(., aes(fill=species, y=values, x= date)) + 
+  pivot_longer(., cols = "Keratella cochlearis"  :"Conochilus unicornis", names_to = "Species", values_to = "values")%>%
+    mutate(species = fct_reorder(Species, values, .fun='median')) %>%
+      mutate(date = as.Date(date))%>%
+  ggplot(., aes(fill=Species, y=values, x= date)) + 
   geom_bar(position="stack", stat="identity")+
+    scale_x_date(breaks="month", labels = scales::label_date("%b"),limits = as.Date(c('2020-10-20','2021-06-15'))) +
   labs(title="Rotifer composition", y = " N per net haul")
 
 plotrot2
@@ -581,10 +596,10 @@ plotrot2
 
 rotiferplot <- rotifer2 %>% 
   filter( site == "Takvatn") %>%
-  pivot_longer(., cols = "Keratella cochlearis"  :"Conochilus unicornis", names_to = "species", values_to = "values") %>%
-     mutate(species = fct_reorder(species, values, .fun='median')) %>%
+  pivot_longer(., cols = "Keratella cochlearis"  :"Conochilus unicornis", names_to = "Species", values_to = "values") %>%
+     mutate(species = fct_reorder(Species, values, .fun='median')) %>%
     mutate(date = as.Date(date))%>%
-  ggplot(., aes(x = date, y = values, fill = species )) +
+  ggplot(., aes(x = date, y = values, fill = Species )) +
   geom_bar(position = "Dodge",stat="identity") +
   scale_x_date(breaks="month", labels = scales::label_date("%b"),limits = as.Date(c('2020-10-20','2021-06-15'))) +
   labs(title="Rotifer composition", y = "N per net haul")+
@@ -593,6 +608,9 @@ facet_wrap(~species, scales="free")
 rotiferplot
 
 ```
+
+
+
 
 ## Zooplankton Biomass
 
@@ -629,6 +647,13 @@ biombar <- Biom %>%
  scale_fill_discrete(name = "Depth", labels = c("20-0m", "60-0m"))
 
 biombar
+```
+
+## !!! combined plot !!!!!
+```{r echo=FALSE,results='hide',fig.keep='all', fig.height = 8, fig.width = 12, fig.align = "center"}
+
+plot_grid( chlbar,  plotrot2, biombar, phybar2,  labels = c('A', 'B', "C", "D"), align = "hv")
+
 ```
 
 ## Zooplankton community
@@ -1274,6 +1299,14 @@ legend("topright", legend=c("1 = 24/11/2020","2 = 15/01/2021","3 = 05/02/2021",
        col=date.col, text.col=date.col, cex=0.8, text.font=2, title="E:Eudiaptomus", title.col="black")
 
 
+library(gridGraphics)
+library(grid)
+grid.echo()
+a <- grid.grab()
+
+grid.newpage()
+grid.draw(a)
+
 
 ```
 
@@ -1414,6 +1447,15 @@ text(rescale * FA2.ca.ccc[FA2.ca.ctr,], labels = colnames(FA2)[FA2.ca.ctr], col 
 legend("topleft", legend=c("1 = 24/11/2020","2 = 15/01/2021","3 = 05/02/2021",
                            "4 = 18/03/2021","5 = 19/04/2021","6 = 04/05/2021","7 = 19/05/2021","8 = 08/06/2021"), 
        col=date.col, text.col=date.col, cex=0.8, text.font=2, title="C:Cyclops", title.col="black")
+
+library(gridGraphics)
+library(grid)
+grid.echo()
+b <- grid.grab()
+
+grid.newpage()
+grid.draw(b)
+
 
 ##################################
 
@@ -1706,6 +1748,17 @@ legend("bottomleft", legend=c("1 = 24/11/2020","2 = 15/01/2021","3 = 05/02/2021"
                            "4 = 18/03/2021","5 = 19/04/2021","6 = 04/05/2021","7 = 19/05/2021","8 = 08/06/2021"), 
        col=date.col, text.col=date.col, cex=0.8, text.font=2, title="C:Cyclops E:Eudiaptomus", title.col="black")
 
+# assign a letter to the plot for use in plot grid
+library(gridGraphics)
+library(grid)
+grid.echo()
+c <- grid.grab()
+
+grid.newpage()
+grid.draw(c)
+
+
+
 ################################################# CCA
 FA.cca1<-cca(FA2~dates+species)		# add species and dates as explanatory variables
 plot(FA.cca1,scaling=3)
@@ -1714,6 +1767,10 @@ anova(FA.cca1, by = "margin") #or by terms, margin, axis
 
 ```
 
+##combine cA plots
+```{r echo=FALSE,results='hide',fig.keep='all', fig.height = 8, fig.width = 12, fig.align = "center"}
+plot_grid( a,b,c , labels = c('A', 'B', "C"))
+```
 
 # NOT WORKING
 # not adjusted yet (might remove this for manuscript data)
